@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
@@ -40,22 +41,14 @@ public class Main {
         sftpGroupXFileSet.add(entity3);
         sftpGroupXFileSet.add(entity4);
 
-        Set<SftpGroupXFileMasks> result = new HashSet<>();
+        Set<SftpGroupXFileMasks> result;
 
-        // BEGIN OF STATIC BULLSHIT
-
-        List<String> operationalFileMasks = new ArrayList<>();
-        operationalFileMasks.add(entity1.getFileMask());
-        operationalFileMasks.add(entity2.getFileMask());
-
-        List<String> financialFileMasks = new ArrayList<>();
-        financialFileMasks.add(entity3.getFileMask());
-        financialFileMasks.add(entity4.getFileMask());
-
-        result.add(new SftpGroupXFileMasks("Operation", operationalFileMasks));
-        result.add(new SftpGroupXFileMasks("Financial", financialFileMasks));
-
-        // END OF STATIC BULLSHIT
+        result = sftpGroupXFileSet.stream()
+                .collect(Collectors.groupingBy(SftpGroupXFile::getGroupName,
+                        Collectors.mapping(SftpGroupXFile::getFileMask, Collectors.toList())))
+                .entrySet().stream()
+                .map(e -> new SftpGroupXFileMasks(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
 
         printResult(result);
     }
